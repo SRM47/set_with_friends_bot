@@ -41,7 +41,7 @@ var observer = new MutationObserver(function(mutations) {
                         console.log()
                         card.children[0].style.borderRadius="6px"
                         card.children[0].style.background="white"
-                        console.log(card)
+                        // console.log(card)
                         
                     })
                     // set the active set down to nothing.
