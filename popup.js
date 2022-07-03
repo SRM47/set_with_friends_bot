@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', function (){
         if (response) {
             // set the new automate value
             AUTOMATE = response.data.auto;
-            button.value = AUTOMATE ? 1:0
             automateText.innerHTML = AUTOMATE ? "Automatic" : "Manual"
             slider.value = response.data.time;
             sliderText.innerHTML = slider.value;
