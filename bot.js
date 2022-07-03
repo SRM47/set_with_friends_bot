@@ -249,6 +249,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else{
                 // if toggle is OFF, then stop the main loop and don't run the bot
                 clearInterval(current_interval)
+                // if toggle is OFF, then if there was a set highlighted, it should be unhighlighted
+                if (active_set.length>0){
+                    active_set.forEach((card) => {
+                        console.log()
+                        card.children[0].style.borderRadius="6px"
+                        card.children[0].style.background="white"
+                        // console.log(card)
+                        
+                    })
+                    // set the active set down to nothing.
+                    active_set = []
+                }
             }
             
             sendResponse({ sender: "bot.js", data: TOGGLE }); // This response is sent to the message's sender 
