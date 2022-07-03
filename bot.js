@@ -3,7 +3,7 @@ var  AUTOMATE = false;
 var TOGGLE = false; //false = BOT IS OFF, true = BOT IS ON...default is off
 var current_interval = 0;
 var HIGHLIGHT_COLOR = "rgba(171, 245, 190, 0.5)"
-var active_sets = {};
+var active_sets = [];
 let colors = {};
 let shapes = {
     "#diamond":1,
@@ -16,12 +16,39 @@ let masks = {
     "transparent": 3
 };
 
+var foo=true;
+
 var observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
+    for(let mutation of mutations) {
       if (mutation.type === "attributes") {
-        console.log("attributes changed")
+        // when we observe that a specific element's attribute changes, 
+        // we are looking for whether the card flipped from being 
+        // visible to invisible
+        // the style tag changes
+        if (mutation.attributeName === "style"){
+            // check to see if the target div's style's opacity is now 0
+            // (meaning is went from active to not active)
+            if (mutation.target.style.opacity==0){
+                // if this card was in a highlighted set, remove the highlight from all the cards in all sets
+                // and remove the sets from the set of active sets
+                active_sets.forEach((set) => {
+                    if (set.includes(mutation.target)){
+                        set.forEach((card) => {
+                            console.log()
+                            card.children[0].style.borderRadius="6px"
+                            card.children[0].style.background="white"
+                            
+                        })
+                    }
+                })
+                active_sets = active_sets.filter((set)=>!(set.includes(mutation.target)))
+                observer.disconnect();
+                foo = true;
+                break;
+            }
+        }
       }
-    });
+    };
   });
 
 function loadCards() {
@@ -157,30 +184,49 @@ function main() {
         }
         // console.log(active_state)
         let set = findSet(active_state);
-        active_sets[set]= Object.keys(set).length + 1;
-        // console.log(set);
+        if (set.length==0){
+            return;
+        }
+        console.log(set);
         if (AUTOMATE){
             set.forEach((element)=>{
                 card_div_elements[element].children[0].click();
             });
         } else{
+            var curr_set = [];
+            
+            
             set.forEach((element)=>{
                 card_div_elements[element].children[0].style.borderRadius="25px"
                 card_div_elements[element].children[0].style.background=HIGHLIGHT_COLOR
+                curr_set.push(card_div_elements[element])
                 observer.observe(card_div_elements[element], {
                     attributes: true //configure it to listen to attribute changes
                   });
-                card_div_elements[element].onclick = function(){
-                    console.log(active_sets[set])
-                    
-                }
             });
-
             
+            //onsole.log(curr_set, active_sets, active_sets===[] )
+            if (active_sets.length==0){
+                active_sets.push(curr_set);
+            }else{
+                var add = true;
+                for(let s of active_sets){
+                    // console.log((JSON.stringify(s)==JSON.stringify(curr_set)))
+                    if ((JSON.stringify(s)==JSON.stringify(curr_set))){
+                        add = false
+                        break;
+                    } 
+                }
+                if(add){
+                    active_sets.push(curr_set);
+                }
+            }
 
+
+            // console.log(active_sets);
 
         }
-        // console.log(AUTOMATE, TIME_INTERVAL, current_interval)
+
         
       }, TIME_INTERVAL*1000);
 }

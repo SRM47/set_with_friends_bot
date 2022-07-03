@@ -1,5 +1,6 @@
 var AUTOMATE = false;
 var TOGGLE = false;
+var MIN_MANUAL_VAL = 1.5;
 
 // send message to content script
 // Depending on who the recipient is, it does this using one of two ways. 
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function (){
   }
 
   button.onclick = function(){
-    updateAutomateState();
+    updateAutomateState(slider);
   }
 
   togglebutton.onclick = function(){
@@ -88,6 +89,12 @@ function toggleBot(slider, button){
 }
 function updateSpeedState(element){
   if(TOGGLE){
+    if (!AUTOMATE){
+      if (element.value<MIN_MANUAL_VAL){
+        element.value=MIN_MANUAL_VAL
+        sliderText.innerHTML=MIN_MANUAL_VAL
+      }
+    }
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       // send the inverse automate
       chrome.tabs.sendMessage(tabs[0].id, { msg: "speed", data: Number(element.value) }, (response) => {
@@ -101,7 +108,7 @@ function updateSpeedState(element){
 
 }
 
-function updateAutomateState() {
+function updateAutomateState(slider) {
   /*
   Invert the automate state
   */
@@ -114,6 +121,12 @@ function updateAutomateState() {
             // set the new automate value
             AUTOMATE = response.data;
             automateText.innerHTML = AUTOMATE ? "Automatic" : "Manual"
+            if (!AUTOMATE){
+              if (slider.value<MIN_MANUAL_VAL){
+                slider.value=MIN_MANUAL_VAL
+                sliderText.innerHTML=MIN_MANUAL_VAL
+              }
+            }
         }
     });
   
