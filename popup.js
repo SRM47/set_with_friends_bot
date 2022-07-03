@@ -1,6 +1,4 @@
-
-
-var  AUTOMATE = null;
+var  AUTOMATE = false;
 
 // send message to content script
 // Depending on who the recipient is, it does this using one of two ways. 
@@ -23,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function (){
   
   // automate button info
   var button = document.getElementById("automateButton");
-  // var automateText = document.getElementById("automateText");
+  var automateText = document.getElementById("automateText");
 
    // display initial info
    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -32,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function (){
         if (response) {
             // set the new automate value
             AUTOMATE = response.data.auto;
-            button.value = AUTOMATE ? "YES" : "NO"
+            button.value = AUTOMATE ? 1:0
+            automateText.innerHTML = AUTOMATE ? "Automatic" : "Manual"
             slider.value = response.data.time;
             sliderText.innerHTML = slider.value;
         }
@@ -47,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function (){
 
   button.onclick = function(){
     updateAutomateState();
-    button.value = AUTOMATE ? "YES" : "NO"
   }
 
 })
@@ -56,9 +54,8 @@ document.addEventListener('DOMContentLoaded', function (){
 function updateSpeedState(element){
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     // send the inverse automate
-    chrome.tabs.sendMessage(tabs[0].id, { msg: "speed", data: parseInt(element.value) }, (response) => {
+    chrome.tabs.sendMessage(tabs[0].id, { msg: "speed", data: Number(element.value) }, (response) => {
         if (response) {
-            // set the new automate value
             sliderText.innerHTML = element.value;
         }
     });
@@ -78,14 +75,9 @@ function updateAutomateState() {
         if (response) {
             // set the new automate value
             AUTOMATE = response.data;
+            automateText.innerHTML = AUTOMATE ? "Automatic" : "Manual"
         }
     });
   
   });
 }
-
-function getInitialValues(){
-
-}
-
-getInitialValues();
