@@ -3,7 +3,7 @@ var  AUTOMATE = false;
 var TOGGLE = false; //false = BOT IS OFF, true = BOT IS ON...default is off
 var current_interval = 0;
 var HIGHLIGHT_COLOR = "rgba(171, 245, 190, 0.5)"
-var active_sets = [];
+var active_set = [];
 let colors = {};
 let shapes = {
     "#diamond":1,
@@ -30,19 +30,26 @@ var observer = new MutationObserver(function(mutations) {
             // (meaning is went from active to not active)
             if (mutation.target.style.opacity==0){
                 // if this card was in a highlighted set, remove the highlight from all the cards in all sets
-                // and remove the sets from the set of active sets
-                active_sets.forEach((set) => {
-                    if (set.includes(mutation.target)){
-                        set.forEach((card) => {
-                            console.log()
-                            card.children[0].style.borderRadius="6px"
-                            card.children[0].style.background="white"
-                            
-                        })
-                    }
-                })
-                active_sets = active_sets.filter((set)=>!(set.includes(mutation.target)))
+                // if the active set includes a card that has been thrown out of the active_state
+                // active state is the set of cards that are in play
+                // then revert all the cards in that set back to normal
+                // solve this problem: If there is more than one SET, and one card is shared between two sets
+                // if an opponent clicks a set, and the other set now only has two cards in play, 
+                // we want to remove that set from being highlighted
+                if (active_set.includes(mutation.target)){
+                    active_set.forEach((card) => {
+                        console.log()
+                        card.children[0].style.borderRadius="6px"
+                        card.children[0].style.background="white"
+                        console.log(card)
+                        
+                    })
+                    // set the active set down to nothing.
+                    active_set = []
+                }
+
                 observer.disconnect();
+                // console.log(active_set)
                 foo = true;
                 break;
             }
@@ -175,6 +182,12 @@ function main() {
     // console.log(cards)
     clearInterval(current_interval)
     current_interval = setInterval(function() {
+        // I will only allow one set to be highlighted
+        // if the user is playing manually, only one set will be highlighted green
+        // this solves the issue of multiple sets being highlighted on the board
+        if (active_set.length>0 && !AUTOMATE){
+            return;
+        }
         let active_state_index = findActiveState(card_div_elements);
         // console.log(active_state_index)
         let active_state = {}
@@ -187,7 +200,6 @@ function main() {
         if (set.length==0){
             return;
         }
-        console.log(set);
         if (AUTOMATE){
             set.forEach((element)=>{
                 card_div_elements[element].children[0].click();
@@ -200,30 +212,20 @@ function main() {
                 card_div_elements[element].children[0].style.borderRadius="25px"
                 card_div_elements[element].children[0].style.background=HIGHLIGHT_COLOR
                 curr_set.push(card_div_elements[element])
+                // each card will observe for attribute changes
+                // if the style changes, that means that the set this card was apart of
+                // has been "played" and so all cards apart of this set should be unhighlighted
+                // observer is above
                 observer.observe(card_div_elements[element], {
                     attributes: true //configure it to listen to attribute changes
                   });
             });
             
-            //onsole.log(curr_set, active_sets, active_sets===[] )
-            if (active_sets.length==0){
-                active_sets.push(curr_set);
-            }else{
-                var add = true;
-                for(let s of active_sets){
-                    // console.log((JSON.stringify(s)==JSON.stringify(curr_set)))
-                    if ((JSON.stringify(s)==JSON.stringify(curr_set))){
-                        add = false
-                        break;
-                    } 
-                }
-                if(add){
-                    active_sets.push(curr_set);
-                }
+            // This is the set that is currently being highlighted on the screen
+            if (active_set.length==0){
+                active_set = curr_set;
             }
-
-
-            // console.log(active_sets);
+            console.log(active_set);
 
         }
 

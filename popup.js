@@ -1,6 +1,6 @@
 var AUTOMATE = false;
 var TOGGLE = false;
-var MIN_MANUAL_VAL = 1.5;
+var MIN_MANUAL_VAL = 0.1;
 
 // send message to content script
 // Depending on who the recipient is, it does this using one of two ways. 
