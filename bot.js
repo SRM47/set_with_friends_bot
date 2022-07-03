@@ -1,7 +1,9 @@
 var TIME_INTERVAL = 5; // in seconds
 var  AUTOMATE = false;
+var TOGGLE = false; //false = BOT IS OFF, true = BOT IS ON...default is off
 var current_interval = 0;
 var HIGHLIGHT_COLOR = "rgba(171, 245, 190, 0.5)"
+var active_sets = {};
 let colors = {};
 let shapes = {
     "#diamond":1,
@@ -14,7 +16,13 @@ let masks = {
     "transparent": 3
 };
 
-
+var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.type === "attributes") {
+        console.log("attributes changed")
+      }
+    });
+  });
 
 function loadCards() {
     var res = [];
@@ -149,6 +157,7 @@ function main() {
         }
         // console.log(active_state)
         let set = findSet(active_state);
+        active_sets[set]= Object.keys(set).length + 1;
         // console.log(set);
         if (AUTOMATE){
             set.forEach((element)=>{
@@ -158,7 +167,16 @@ function main() {
             set.forEach((element)=>{
                 card_div_elements[element].children[0].style.borderRadius="25px"
                 card_div_elements[element].children[0].style.background=HIGHLIGHT_COLOR
+                observer.observe(card_div_elements[element], {
+                    attributes: true //configure it to listen to attribute changes
+                  });
+                card_div_elements[element].onclick = function(){
+                    console.log(active_sets[set])
+                    
+                }
             });
+
+            
 
 
         }
@@ -167,14 +185,32 @@ function main() {
       }, TIME_INTERVAL*1000);
 }
 
-// wait for webpage to load
-document.addEventListener('DOMContentLoaded', function (){
-    console.log("loaded")
-    main()
-})
+
 
 
 // message listeners
+
+// wait for toggle on to load
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if(request) {
+        if (request.msg == "toggle") {
+            TOGGLE = !TOGGLE
+            if (TOGGLE){
+                // if toggle is ON,  then run the bot
+                main()
+            } else{
+                // if toggle is OFF, then stop the main loop and don't run the bot
+                clearInterval(current_interval)
+            }
+            
+            sendResponse({ sender: "bot.js", data: TOGGLE }); // This response is sent to the message's sender 
+        }
+        
+    }
+});
+
+
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if(request) {
         if (request.msg == "automate") {
@@ -201,7 +237,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if(request) {
         if (request.msg == "initial") {
-            sendResponse({ sender: "bot.js", data: {auto:AUTOMATE, time:TIME_INTERVAL} }); // This response is sent to the message's sender 
+            sendResponse({ sender: "bot.js", data: {auto:AUTOMATE, time:TIME_INTERVAL, toggle:TOGGLE} }); // This response is sent to the message's sender 
         }
     }
 });

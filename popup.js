@@ -1,4 +1,5 @@
-var  AUTOMATE = false;
+var AUTOMATE = false;
+var TOGGLE = false;
 
 // send message to content script
 // Depending on who the recipient is, it does this using one of two ways. 
@@ -23,6 +24,10 @@ document.addEventListener('DOMContentLoaded', function (){
   var button = document.getElementById("automateButton");
   var automateText = document.getElementById("automateText");
 
+  // toggle on off button info
+  var togglebutton = document.getElementById("toggleButton");
+  var toggleText = document.getElementById("toggleText");
+
    // display initial info
    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     // send the inverse automate
@@ -33,6 +38,12 @@ document.addEventListener('DOMContentLoaded', function (){
             automateText.innerHTML = AUTOMATE ? "Automatic" : "Manual"
             slider.value = response.data.time;
             sliderText.innerHTML = slider.value;
+            TOGGLE = response.data.toggle;
+            toggleText.innerHTML = TOGGLE ? "On" : "Off";
+            if (!TOGGLE){
+              slider.disabled = true;
+              button.disabled = true;
+            }
         }
     });
   
@@ -47,26 +58,54 @@ document.addEventListener('DOMContentLoaded', function (){
     updateAutomateState();
   }
 
+  togglebutton.onclick = function(){
+    toggleBot(slider, button);
+  }
+
+
 })
 
-
-function updateSpeedState(element){
+function toggleBot(slider, button){
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     // send the inverse automate
-    chrome.tabs.sendMessage(tabs[0].id, { msg: "speed", data: Number(element.value) }, (response) => {
+    chrome.tabs.sendMessage(tabs[0].id, { msg: "toggle", data: !TOGGLE }, (response) => {
         if (response) {
-            sliderText.innerHTML = element.value;
+            // set the new automate value
+            TOGGLE = response.data;
+            toggleText.innerHTML = TOGGLE ? "On" : "Off";
+            if (TOGGLE){
+              slider.disabled = false;
+              button.disabled = false;
+            } else{
+              slider.disabled = true;
+              button.disabled = true;
+            }
         }
     });
   
   });
+
+}
+function updateSpeedState(element){
+  if(TOGGLE){
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      // send the inverse automate
+      chrome.tabs.sendMessage(tabs[0].id, { msg: "speed", data: Number(element.value) }, (response) => {
+          if (response) {
+              sliderText.innerHTML = element.value;
+          }
+      });
+    
+    });
+  }
+
 }
 
 function updateAutomateState() {
   /*
   Invert the automate state
   */
-
+  if (TOGGLE){
   // Send a message to the content script to invert its automate state
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     // send the inverse automate
@@ -79,4 +118,6 @@ function updateAutomateState() {
     });
   
   });
+  }
+
 }
