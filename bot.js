@@ -1,7 +1,6 @@
-console.log("Script Injected!")
-
 var TIME_INTERVAL = 5; // in seconds
 var  AUTOMATE = false;
+var current_interval = 0;
 var HIGHLIGHT_COLOR = "rgba(171, 245, 190, 0.5)"
 let colors = {};
 let shapes = {
@@ -14,19 +13,6 @@ let masks = {
     "striped": 2,
     "transparent": 3
 };
-
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-      console.log(sender.tab ?
-                  "from a content script:" + sender.tab.url :
-                  "from the extension");
-      if (request.greeting === "hello"){
-        AUTOMATE = request.val
-        sendResponse({farewell: "goodbye"});
-      }
-        
-    }
-);
 
 
 
@@ -152,7 +138,8 @@ function main() {
     var card_div_elements = loadCards();
     var cards = card_div_elements.map(elem => makeCard(elem));
     // console.log(cards)
-    setInterval(function() {
+    clearInterval(current_interval)
+    current_interval = setInterval(function() {
         let active_state_index = findActiveState(card_div_elements);
         // console.log(active_state_index)
         let active_state = {}
@@ -173,12 +160,49 @@ function main() {
                 card_div_elements[element].children[0].style.background=HIGHLIGHT_COLOR
             });
 
+
         }
+        // console.log(AUTOMATE, TIME_INTERVAL, current_interval)
         
       }, TIME_INTERVAL*1000);
 }
 
-
 // wait for webpage to load
-setTimeout(main, 2000);
+document.addEventListener('DOMContentLoaded', function (){
+    console.log("loaded")
+    main()
+})
+
+
+// message listeners
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if(request) {
+        if (request.msg == "automate") {
+            AUTOMATE = !AUTOMATE
+            main()
+            sendResponse({ sender: "bot.js", data: AUTOMATE }); // This response is sent to the message's sender 
+        }
+        
+    }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if(request) {
+        if (request.msg == "speed") {
+            TIME_INTERVAL = request.data;
+            main()
+            sendResponse({ sender: "bot.js", data: AUTOMATE }); // This response is sent to the message's sender 
+        }
+
+    }
+});
+
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if(request) {
+        if (request.msg == "initial") {
+            sendResponse({ sender: "bot.js", data: {auto:AUTOMATE, time:TIME_INTERVAL} }); // This response is sent to the message's sender 
+        }
+    }
+});
 

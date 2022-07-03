@@ -1,12 +1,27 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="popup.js"></script>
   </head>
   <body>
-    <form>
-      <input type="checkbox" id="myCheck"  onclick="myFunction()">
-    </form>
 
-    <script src="popup.js"></script>
+    <div id="automate">
+      <p>Automate</p>
+      <form>
+        <input type="checkbox"  value = "0" id="automateButton" onclick="updateAutomateState()">
+      </form>
+      <p id="automateText"> </p>
+    </div>
+    <br>
+    <div id="slider">
+      <p>Speed</p>
+      <div class="slidecontainer">
+        <input type="range" min="0.3" step="0.1" max="20" value="6" class="slider" id="speedSlider">
+      </div>
+      <p id="sliderText"></p>
+    </div>
+    
+
+    
   </body>
 </html>
