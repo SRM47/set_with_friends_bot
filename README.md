@@ -9,4 +9,5 @@ So, I created a Google Chrome extension to automate my "Set With Friends"
 experience...and hopefully yours too!
 
 Play Set With Friends...with your friends... at https://setwithfriends.com, with this bot!
-They'll never see it coming🧑🏽‍🦯
+
+Disclaimer: Please do not use this bot in a public game. This bot's use is intended for private games with people you know you are using it.
