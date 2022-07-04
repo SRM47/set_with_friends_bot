@@ -10,4 +10,4 @@ experience...and hopefully yours too!
 
 Play Set With Friends...with your friends... at https://setwithfriends.com, with this bot!
 
-Disclaimer: Please do not use this bot in a public game. This bot's use is intended for private games with people you know you are using it. This is specified in the website's conduct page: https://setwithfriends.com/conduct.
+Disclaimer: Please do **not** use this bot in a public game. This bot's use is intended for **private games only**, with **people who know you are using it**. This is specified in the website's conduct page: https://setwithfriends.com/conduct.
